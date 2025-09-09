@@ -133,19 +133,19 @@ class MujocoMulti(MultiAgentEnv):
         # for agent_idx in range(len(actions)):
         #     print ('action [{}]: {} (end={}, len={})'.format(agent_idx, actions[agent_idx], self.action_space[agent_idx].low.shape[0], len(actions[agent_idx])))
 
-        obs_n, reward_n, done_n, info_n = self.wrapped_env.step(flat_actions)
+        obs_n, reward_n, terminated, truncated, info_n = self.wrapped_env.step(flat_actions)
         self.steps += 1
 
         info = {}
         info.update(info_n)
 
-        if done_n:
+        if terminated or truncated:
             if self.steps < self.episode_limit:
                 info["episode_limit"] = False  # the next state will be masked out
             else:
                 info["episode_limit"] = True  # the next state will not be masked out
 
-        return reward_n, done_n, info
+        return reward_n, terminated, truncated, info
 
     def get_obs(self):
         """Returns all agent observat3ions in a list"""

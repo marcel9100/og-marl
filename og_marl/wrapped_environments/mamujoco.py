@@ -14,7 +14,7 @@
 from typing import Any, Dict, Optional
 
 import numpy as np
-from multiagent_mujoco.mujoco_multi import MujocoMulti
+from og_marl.custom_environments.multiagent_mujoco.mujoco_multi import MujocoMulti
 
 from og_marl.wrapped_environments.base import BaseEnvironment, ResetReturn, StepReturn
 
@@ -23,7 +23,7 @@ def get_mamujoco_args(scenario: str) -> Dict[str, Any]:
     env_args = {
         "agent_obsk": 1,
         "episode_limit": 1000,
-        # "global_categories": "qvel,qpos",
+        "global_categories": "qvel,qpos",
     }
     if scenario.lower() == "4ant":
         env_args["scenario"] = "Ant-v2"
@@ -61,7 +61,7 @@ class MAMuJoCo(BaseEnvironment):
             agent: observations[i].astype("float32") for i, agent in enumerate(self.agents)
         }
 
-        info = {"state": self._environment.get_state()}
+        info = None #{"state": self._environment.get_state()}
 
         return observations, info
 
@@ -70,10 +70,10 @@ class MAMuJoCo(BaseEnvironment):
         for agent in self.agents:
             mujoco_actions.append(actions[agent])
 
-        reward, done, info = self._environment.step(mujoco_actions)
+        reward, terminated, truncated, info = self._environment.step(mujoco_actions)
 
-        terminals = {agent: np.array(done) for agent in self.agents}
-        truncations = {agent: np.array(False) for agent in self.agents}
+        terminals = {agent: np.array(terminated) for agent in self.agents}
+        truncations = {agent: np.array(truncated) for agent in self.agents}
 
         rewards = {agent: reward for agent in self.agents}
 
@@ -83,7 +83,7 @@ class MAMuJoCo(BaseEnvironment):
             agent: observations[i].astype("float32") for i, agent in enumerate(self.agents)
         }
 
-        info["state"] = self._environment.get_state()
+        info["state"] = None #self._environment.get_state()
 
         return observations, rewards, terminals, truncations, info  # type: ignore
 
